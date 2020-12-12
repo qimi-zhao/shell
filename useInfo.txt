@@ -7,3 +7,7 @@ git add filename.file   --添加新文件
 git commmit -m          --提交
 git push                --上传
 git log                 --查看记录
+
+上传前需要配置当前用户信息
+git config --global user.name ""
+git config --global user.email ""
