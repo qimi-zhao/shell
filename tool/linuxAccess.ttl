@@ -1,0 +1,26 @@
+;Host Name
+HOSTNAME = '127.0.0.1'
+
+;User name
+USERNAME = 'user1'
+
+;Key Word
+PASSWORD = 'password1'
+KEYFILE = 'D:\\fileAccess\\user1.pem'
+
+COMMAND = HOSTADDR
+strconact COMMAND ':22 lssh 12 lauth = public luser = '
+strconact COMMAND USERNAME
+strconact COMMAND ' lkeyfile = '
+strconact COMMAND KEYFILE
+strconact COMMAND ' lpassword = '
+strconact COMMAND PASSWORD
+
+;Connect
+connect COMMAND
+
+wait '[user1@FD]'
+senDin 'export HOME_PATH=/usr/user1/tmp'
+
+wait '[user1@FD]'
+sendIn 'cd /usr/user1/tmp'
