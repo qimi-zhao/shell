@@ -2,25 +2,34 @@
 HOSTNAME = '127.0.0.1'
 
 ;User name
-USERNAME = 'user1'
+USERNAME = 'bcc'
 
 ;Key Word
 PASSWORD = 'password1'
-KEYFILE = 'D:\\fileAccess\\user1.pem'
 
-COMMAND = HOSTADDR
-strconact COMMAND ':22 lssh 12 lauth = public luser = '
-strconact COMMAND USERNAME
-strconact COMMAND ' lkeyfile = '
-strconact COMMAND KEYFILE
-strconact COMMAND ' lpassword = '
-strconact COMMAND PASSWORD
+;KEYFILE
+KEYFILE = 'C:\\newGenba\\lisence\\test.pem'
+
+COMMAND = HOSTNAME
+strconcat COMMAND ':22 /ssh /2 /auth=publickey /user='
+strconcat COMMAND USERNAME
+strconcat COMMAND ' /keyfile="'
+strconcat COMMAND KEYFILE
+strconcat COMMAND '" /password='
+strconcat COMMAND PASSWORD
 
 ;Connect
 connect COMMAND
 
-wait '[user1@FD]'
-senDin 'export HOME_PATH=/usr/user1/tmp'
+senDin 'test11'
 
-wait '[user1@FD]'
-sendIn 'cd /usr/user1/tmp'
+;Host Connect End;
+;User name
+USERNAME1 = 'test177'
+
+COMMAND = 'su - '
+strconact COMMAND USERNAME1
+
+wait 'KAIHATSU bccbt11d [/home/test11]%'
+senDin COMMAND
+sendIn USERNAME1
