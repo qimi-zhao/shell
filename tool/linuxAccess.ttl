@@ -1,35 +1,33 @@
 ;Host Name
-HOSTNAME = '127.0.0.1'
+HOSTNAME = 'bcc-bastion.dev.tmpbcctest.com'
 
 ;User name
 USERNAME = 'bcc'
 
-;Key Word
-PASSWORD = 'password1'
+;Password
+PASSWD = 'bccmgr11'
 
 ;KEYFILE
-KEYFILE = 'C:\\newGenba\\lisence\\test.pem'
+KEYFILE = 'C:\\newGenba\\lisence\\bcc-front-bastion.pem'
 
 COMMAND = HOSTNAME
 strconcat COMMAND ':22 /ssh /2 /auth=publickey /user='
 strconcat COMMAND USERNAME
 strconcat COMMAND ' /keyfile="'
 strconcat COMMAND KEYFILE
-strconcat COMMAND '" /password='
-strconcat COMMAND PASSWORD
 
 ;Connect
 connect COMMAND
 
-senDin 'test11'
+wait 'password:'
+Sendln PASSWD
 
 ;Host Connect End;
 ;User name
-USERNAME1 = 'test177'
+USERNAME1 = 'kdi00177'
 
-COMMAND = 'su - '
-strconact COMMAND USERNAME1
+COMMAND1 = 'su - '
+strconcat COMMAND1 USERNAME1
 
-wait 'KAIHATSU bccbt11d [/home/test11]%'
-senDin COMMAND
-sendIn USERNAME1
+wait 'KAIHATSU bccbt11d [/home/bccmgr11]%'
+Sendln COMMAND1
