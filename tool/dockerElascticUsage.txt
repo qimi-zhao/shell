@@ -1,0 +1,35 @@
+
+// -- docker usage
+// ---------- all application in docker
+docker ps -a
+
+// ---------- find application log path
+docker inspect appName | grep json.log
+
+// ---------- clear application log
+cat /dev/null > ...(上条命令执行结果)
+
+// -- cqlsh usage
+./cqlsh localhost
+
+// -- ElasticSearch
+// ---------- All Records
+curl -XPOST localhost:9200/indexName/_search?pretty -H "Content-Type:application/json" -d '{"query":{"match_all":{}}}'
+
+//---------- json data import
+curl -XPOST 'http://localhost:9200/_bulk?pretty' -H "Content-Tyep:application/json" --data-binary @testdata.json
+
+// ---------- Index list
+curl -XGET localhost:9200/_cat/indices?pretty
+
+// ----------  Mapping check
+curl -XGET localhost:9200/indextName/_mapping?pretty
+
+// ---------- index delete
+curl -XDELETE localhost:9200/indexName?pretty
+
+// ---------- delete all data of a index
+curl -XPOST http://localhost:9200/indexName/_delete_by_query?pretty -H "Content-Type:application/json" -d '{"query":{"match_all":{}}}'
+
+// ----------  select all data of aindex
+curl -XPOST http://localhost:9200/indexName/_search?pretty -H "Content-Type:application/json" -d '{"query":{"match_all":{}}}'
