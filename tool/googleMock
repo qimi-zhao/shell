@@ -1,0 +1,94 @@
+Linux C/C++ Test不同对象类型的mock方法实现
+主要思想：mock的实现依赖于用mock对象代替mock的目标实体置于test工程内。
+
+一，mock对象的创建
+1，C函数（有namespace）
+2，C函数（无namespace）
+    2-1. mock头文件做成
+        #ifndf TEST_MOCK_TESTCLASS(TESTFUNCTION)_H
+        #define TEST_MOCK_TESTCLASS(TESTFUNCTION)_H
+        class _mock_funcName {
+        public：
+            int oprator()(std::string& str){
+                return mock_func_fucName(str);
+            }
+            MOCK_METHOD1(mock_func_fucName, int(std::string& str)); //METHOD后接参数数量，第二个参数返回值和引数必须同上
+        }
+        #endif
+    2-2. 实装
+    ...
+    #include "test_file.h"
+    _mock_funcName* mock_funcName;
+    ...
+    int funcName(std::string& str){        //有namespace时在此添加（将测试代码的函数指向此处）
+        return (*mock_funcName)(str);
+    }
+    ...
+    class fileNameTest : public ::testing::Test{
+    protected:
+        static void SetupTestCase(){mock_funcName = new _mock_funcName; Mock::AllowLeak(mock_funcName);}
+        static void TearDownTestCase(){delete mock_funcName;}
+        static void SetUp(){}
+        static void TearDown(){Mock::VerifyAndClearExpectations(mock_funcName);}
+    }
+    ...
+    EXPECT_CALL(*mock_funcName, mock_func_fucName(_)).WillOnce(Return(0));
+    ...
+3，class类
+4，class类成员函数
+    4-1.只导入类头文件 fileName.h 含一系列mock函数 ： MOCK_METHOD1(mock_func_fucName, int());
+    4-2.生成mock函数 mock_fileName.h,同上导入并创建 ： *mock_ClassName
+    4-3.为类生成stub函数
+        int fileName::functionName(){
+            return (*mock_ClassName)();
+        }
+    4-4.实装 EXPECT_CALL(*mock_ClassName, mock_func_fucName(_)).WillOnce(Return(0));
+5，interface 和 factory的mock
+    5-1.头文件的定义（同上）
+       定义interface和factory的头文件
+       factory头文件中的类中定义GetInstance函数，并返回static 值（对象）,
+       ...
+       #undef ObjectFactory     // 将以下所有使用此interface的源文件指向mockInterface
+       #define ObjectFactory mock_ObjectFactory
+       ...
+           static ObjectFactory& GetInstance();
+           MOCK_METHOD1(mock_func_fucName, int(uint64_t v));
+       ...
+       ObjectFactory& mock_ObjectFactory::GetInstance()
+       {
+         static mock_ObjectFactory gtest_object;
+         return gtest_object;
+       }
+       ...
+    5-2. 实装
+        测试文件中直接GetInstance并设置mock函数
+       ...
+         mock_Interface* mock_coi = mock_ObjectFactory::GetInstance();
+         EXPECT_CALL(*mock_coi, mock_func_fucName(_)).WillOnce(Return(0));
+       ...
+
+二，mock函数的使用
+1.一次返回
+    EXPECT_CALL(*mock_name, mock_func_name(_, ...)).WillOnce(Return(return_value));
+2.复数次返回
+    EXPECT_CALL(*mock_name, mock_func_name(_, ...)).WillRepeatedly(Return(return_value));
+3.指定次数返回
+    EXPECT_CALL(*mock_name, mock_func_name(_, ...)).Time(n)
+        .WillOnce(Return(return_value));
+        ... n ...
+        .WillOnce(Return(return_value));
+4.给mock函数的传入变量赋值(value_num:第几个参数, value:赋值（类型一致)
+    EXPECT_CALL(*mock_name, mock_func_name(_, ...))
+        .WillOnce(DoAll(SetArgPointee<value_num>(value),Return(EN_CO_E_OK)))
+5.给指针赋值
+    st_struct ret_kind = {en_SendKind::kUploadFile, (communication_object::handle)&tmp_id1, try_count};
+    EXPECT_CALL(*mock_name, mock_func_name(_, ...)).WillOnce(
+       Invoke([ret_kind](int fd, void *buf, size_t len) {
+          st_CallbackCommonParam *p_buff = (st_CallbackCommonParam *)buf;
+          *p_buff = ret_kind;
+          return 0;
+        }))
+三，问题点
+1，执行时不跑testClass反而进入了main（）函数
+      原因：gtest导入了含有main函数的源文件，导致编译时自动设置main为程序入口
+      解决：gtest导入含有main函数的源文件前一行添加 #define main _old_main
